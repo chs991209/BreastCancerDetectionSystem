@@ -1,0 +1,21 @@
+# --- Core Deep Learning & Vision ---
+timm>=0.9.12
+einops>=0.7.0
+numpy>=1.24.0
+
+# --- Medical Imaging I/O & Preprocessing ---
+monai>=1.3.0
+pydicom>=2.4.4
+python-gdcm>=3.0.22
+albumentations>=1.4.0
+opencv-python-headless>=4.9.0
+
+# --- Metrics, Uncertainty & Logging ---
+torchmetrics>=1.3.0
+wandb>=0.16.0
+scikit-learn>=1.3.2
+
+# --- Notebook & Development ---
+jupyterlab>=4.1.0
+matplotlib>=3.8.2
+pandas>=2.2.0

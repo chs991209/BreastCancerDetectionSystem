@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  bc_detection_system:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bc_detection_system_rtx4090
+    # DataLoader OOM 및 Segmentation Fault 원천 차단 (시스템 램의 50% 이상 권장)
+    shm_size: '32gb'
+    # 호스트 네트워크 IPC 공유로 I/O 병목 제거
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu, utility, compute]
+    volumes:
+      # 소스 코드 마운트
+      - .:/workspace
+      # EMBED 데이터셋 등 대용량 데이터 마운트 경로 (실제 데이터 경로에 맞게 좌측 수정 필요)
+      - /home/leggo/choihyunsu/data:/data
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - CUDA_VISIBLE_DEVICES=0
+    # 백그라운드 무한 대기
+    command: tail -f /dev/null
