@@ -1,21 +1,52 @@
-# --- Core Deep Learning & Vision ---
-timm>=0.9.12
-einops>=0.7.0
-numpy>=1.24.0
+# ==============================================================================
+# Dimension-Agnostic Medical AI System - Requirements Specification
+# Hardware Target: NVIDIA RTX 4090 (24GB VRAM) / Linux / CUDA 13.2
+# ==============================================================================
 
-# --- Medical Imaging I/O & Preprocessing ---
-monai>=1.3.0
-pydicom>=2.4.4
-python-gdcm>=3.0.22
-albumentations>=1.4.0
-opencv-python-headless>=4.9.0
+# ------------------------------------------------------------------------------
+# 1. Core Deep Learning Engine
+# (CUDA 13.2 호환을 위한 최신 안정화 버전. VRAM 및 Gradient Checkpointing 제어용)
+# ------------------------------------------------------------------------------
+torch>=2.4.0
+torchvision>=0.19.0
+torchaudio>=2.4.0
 
-# --- Metrics, Uncertainty & Logging ---
-torchmetrics>=1.3.0
-wandb>=0.16.0
-scikit-learn>=1.3.2
+# ------------------------------------------------------------------------------
+# 2. Medical Imaging & 3D Volumetric Processing
+# (3D DBT 텐서 입출력 및 의료 표준 포맷 디코딩 레이어)
+# ------------------------------------------------------------------------------
+monai>=1.4.0        # Medical Open Network for AI (3D 텐서 증강, 패치화 및 의료 특화 Metrics)
+pydicom>=2.4.4      # DICOM 표준 파싱 (Duke DBT, INbreast, VinDr-Mammo 원본 I/O)
+python-gdcm>=3.0.22 # 압축 DICOM 디코딩 (JPEG2000/JPEG-LS) — 실데이터셋 필수
+pylibjpeg>=2.0      # pydicom 호환 JPEG 디코더 프레임워크
+pylibjpeg-libjpeg>=2.0
+pylibjpeg-openjpeg>=2.0
+SimpleITK>=2.3.1    # 강력한 의료 영상 전처리 및 정합(Registration) 커널
+nibabel>=5.2.1      # NIfTI 포맷 호환 (중간 3D 볼륨 캐싱용)
+opencv-python-headless>=4.9.0  # CLAHE, 유방 영역 분할, 흉근 제거 등 전처리 표준
 
-# --- Notebook & Development ---
-jupyterlab>=4.1.0
-matplotlib>=3.8.2
-pandas>=2.2.0
+# ------------------------------------------------------------------------------
+# 3. Transformer Backbones & Tensor Dynamics
+# (Swin Transformer 뼈대 및 차원 강하(Dimension Drop) 수학적 연산 보조)
+# ------------------------------------------------------------------------------
+timm>=1.0.0         # PyTorch Image Models (최적화된 Swin-B 백본 및 ImageNet 가중치 로드)
+einops>=0.8.0       # 직관적이고 엄밀한 텐서 차원 조작 (B C Z H W -> B N D_emb 변환용)
+
+# ------------------------------------------------------------------------------
+# 4. Math, Metrics & Scientific Computing
+# (Phase 3 불확실성 정량화 및 Phase 4 기하학적 충실도(IoU) 연산 레이어)
+# ------------------------------------------------------------------------------
+numpy>=1.26.4
+pandas>=2.2.2
+scipy>=1.13.0
+scikit-learn>=1.5.0 # AUROC, F1-Score 등 임상 통계 매트릭스 산출
+scikit-image>=0.23.0
+
+# ------------------------------------------------------------------------------
+# 5. MLOps & System Configuration
+# (분산형 시스템 모니터링 및 설정 관리)
+# ------------------------------------------------------------------------------
+wandb>=0.17.0       # Weights & Biases (도메인 편이(Domain Shift) 추적 및 훈련 지표 기록)
+tensorboard>=2.17.0
+pyyaml>=6.0.1       # 아키텍처 하이퍼파라미터 및 계층적 동결 전략 Config 관리
+tqdm>=4.66.4
