@@ -1,0 +1,36 @@
+services:
+  bc_detection_system:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bc_detection_system_a6000
+    # DataLoader OOM 및 Segmentation Fault 원천 차단 (호스트 RAM 251GB → 64GB 할당)
+    shm_size: '64gb'
+    # 호스트 네트워크 IPC 공유로 I/O 병목 제거
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu, utility, compute]
+    volumes:
+      # 소스 코드 마운트
+      - .:/workspace
+      # 작업/캐시용 데이터 경로 (A6000 서버 호스트 경로)
+      - /home/oem/choihyunsu/data:/data
+      # 원본 데이터셋(외장 SSD) 읽기 전용 마운트. 경로에 공백이 있어 long-syntax 사용.
+      # 컨테이너 내부에서 BCS-DBT 루트 = /data/datasets/BCS-DBT
+      - type: bind
+        source: /mnt/external_ssd/BreastCancer Datasets
+        target: /data/datasets
+        read_only: true
+      # 전처리 캐시(외장 SSD, 쓰기 가능). OS 디스크(/ 61G 여유)가 아닌 SSD(1.6T 여유)에 저장.
+      # 컨테이너 내부 캐시 경로 = /data/cache  (BCSDBTDataset 기본 cache_dir)
+      - /mnt/external_ssd/bc_cache:/data/cache
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - CUDA_VISIBLE_DEVICES=0
+    # 백그라운드 무한 대기
+    command: tail -f /dev/null

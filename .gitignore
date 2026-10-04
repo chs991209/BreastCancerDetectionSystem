@@ -1,0 +1,29 @@
+# IDE
+.idea/
+
+# Checkpoints / model weights (large binaries)
+*.pth
+*.pt
+*.ckpt
+checkpoints/
+checkpoints_b16/
+**/checkpoints/
+
+# Datasets / tables / medical images (not redistributable, large)
+*.dcm
+*.npz
+EMBED/
+/data/bc_data_3D/BCS-DBT/breast_cancer_screening_dbt/
+
+# Reference papers (copyrighted PDFs — not for public repo)
+papers/
+
+# Logs
+logs/
+*.log
+prewarm.log
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

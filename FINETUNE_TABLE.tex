@@ -1,0 +1,36 @@
+% ============================================================
+%  Stage-1 DBT fine-tuning results (Overleaf-ready)
+%  Requires: \usepackage{booktabs}   % add to your preamble
+%  Held-out DBT TEST/VAL AUROC. Backbone: 2.5D per-slice Swin-B (+ MIL).
+%  Combined training data: BCS-DBT + DBT-2026.
+%  Both rows are DBT fine-tuned; they differ only in initialization.
+%  ImageNet->DBT = ImageNet-pretrained init then DBT fine-tune (backbone source of m1).
+%  Scratch->DBT  = random init then DBT fine-tune (backbone source of mscratch).
+%  Delta_init = (ImageNet->DBT) - (Scratch->DBT)  (gain from ImageNet initialization)
+% ============================================================
+
+% ---- Minimal standalone wrapper (delete if pasting into an existing paper) ----
+\documentclass{article}
+\usepackage{booktabs}
+\begin{document}
+
+\begin{table}[t]
+  \centering
+  \caption{Stage-1 DBT fine-tuning AUROC on the held-out DBT split
+  (2.5D per-slice Swin-B + MIL, trained on combined BCS-DBT + DBT-2026).
+  The ImageNet-only model (m0 source) has no DBT stage, hence no DBT score (---).
+  $\Delta_{\mathrm{init}}=$(ImageNet$\rightarrow$DBT)$-$(Scratch$\rightarrow$DBT). Higher is better.}
+  \label{tab:finetune_dbt}
+  \begin{tabular}{lcc}
+    \toprule
+    Model (init $\rightarrow$ DBT fine-tune) & VAL AUROC & TEST AUROC \\
+    \midrule
+    ImageNet $\rightarrow$ DBT (m1 source)      & $\mathbf{0.951}$ & $\mathbf{0.929}$ \\
+    Scratch $\rightarrow$ DBT (mscratch source) & $0.894$ & $0.851$ \\
+    \midrule
+    $\Delta_{\mathrm{init}}$ (m1 $-$ mscratch)  & $+0.057$ & $+0.078$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\end{document}
