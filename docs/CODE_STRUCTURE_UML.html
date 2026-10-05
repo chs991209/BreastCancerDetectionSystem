@@ -1,0 +1,155 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BCS-DBT Code Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #f5f7fa;
+  --surface: #ffffff;
+  --ink: #18222e;
+  --muted: #566476;
+  --rule: #d6dde6;
+  --accent: #2b5f8e;
+  --accent-soft: #e4edf6;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #11161d;
+    --surface: #18202a;
+    --ink: #e3e9f0;
+    --muted: #9aa8b8;
+    --rule: #2b3643;
+    --accent: #7fb0dc;
+    --accent-soft: #1d2b3a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #11161d;
+  --surface: #18202a;
+  --ink: #e3e9f0;
+  --muted: #9aa8b8;
+  --rule: #2b3643;
+  --accent: #7fb0dc;
+  --accent-soft: #1d2b3a;
+}
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.55;
+}
+.wrap { max-width: 1100px; margin: 0 auto; padding-inline: 20px; padding-block: 32px 56px; }
+header { display: grid; gap: 8px; padding-bottom: 20px; border-bottom: 1px solid var(--rule); }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-size: clamp(26px, 4vw, 34px); font-weight: 600; text-wrap: balance; }
+h2 { margin: 0; font-size: 20px; font-weight: 600; text-wrap: balance; }
+p { margin: 0; max-width: 68ch; }
+.lede { color: var(--muted); }
+code { font-family: var(--mono); font-size: .9em; background: var(--accent-soft); padding: 1px 5px; border-radius: 3px; }
+nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+nav a {
+  font-size: 13px; color: var(--accent); text-decoration: none;
+  border: 1px solid var(--rule); border-radius: 999px; padding: 4px 12px; background: var(--surface);
+}
+nav a:hover, nav a:focus-visible { border-color: var(--accent); outline: none; }
+main { display: grid; gap: 40px; margin-top: 32px; }
+section { display: grid; gap: 12px; scroll-margin-top: 16px; }
+.kind { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.diagram {
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 16px; overflow-x: auto;
+}
+.diagram pre.mermaid { margin: 0; background: transparent; font-family: var(--sans); text-align: center; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); }
+.legend span b { font-family: var(--mono); font-weight: 500; color: var(--ink); }
+footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--muted); }
+</style>
+</head><body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">UML · BCS-DBT repository · 2026-10-04</div>
+    <h1>BCS-DBT Code Map</h1>
+  </header>
+
+  <main>
+    <section id="components">
+      <div class="kind">Component diagram</div>
+      <h2>Folders and their contents</h2>
+      <div class="diagram">
+<pre class="mermaid">
+classDiagram
+  direction TB
+  class common["common/"] {
+    &lt;&lt;shared&gt;&gt;
+    model.py : DimensionAgnostic3DSwin, CosineHead
+    preprocessing.py : MedicalImagePreprocessor
+  }
+  class fine_tuning["fine_tuning/"] {
+    &lt;&lt;3D DBT stage, BCS-DBT&gt;&gt;
+    data_preprocessing.py : BCSDBTDataset, collate_dbt_volumes, samplers
+    fine-tune.py : train_model
+    pretrain_ssl.py : MoCo, Encoder, DBTSliceSSL
+    prewarm_cache.py : prewarm
+  }
+  class fine_tuning_combined["fine_tuning_combined/"] {
+    &lt;&lt;3D DBT stage, combined&gt;&gt;
+    combined.py : LesionBCSDBT, build_combined_dataset, RatioUndersampler
+    dataset_dbt2026.py : DBT2026Dataset
+    fine-tune_combined.py : train_combined
+    train_scratch.py : random-init run
+  }
+  class transfer_learning["transfer_learning/"] {
+    &lt;&lt;2D transfer stage&gt;&gt;
+    mammo2d_base.py : Mammo2DDataset, collate_mammo2d
+    transfer_common.py : run_transfer, samplers, losses
+    run_kd.py : 3D teacher to 2D student
+    embed/ vindr/ cmmd/ inbreast/ cbis/ : dataset.py, run.py
+    mias/ rsna/ cddcesm/ busi/ : dataset.py, run.py
+  }
+  class experiments["experiments/"] {
+    &lt;&lt;paper runs&gt;&gt;
+    multiseed_matrix.py : seeds x datasets x methods
+    malignancy_*.py, scratch_*.py, cosine_m1_run.py
+    compare_m0_m1.py, organize_auc.py : summaries
+  }
+  class scripts["scripts/"] {
+    &lt;&lt;helpers&gt;&gt;
+    smoke_test_25d.py
+    embed_finish.sh
+  }
+  class checkpoints["checkpoints/, checkpoints_b16/"] {
+    &lt;&lt;model weights&gt;&gt;
+    combined_*.pth : DBT models
+    ssl_swinb_backbone.pth : SSL backbone
+  }
+  class records["docs/, logs/, results/"] {
+    &lt;&lt;outputs&gt;&gt;
+    docs : documentation
+    logs : run logs
+    results : AUROC csv
+  }
+  fine_tuning ..> common : imports
+  fine_tuning_combined ..> common : imports
+  fine_tuning_combined ..> fine_tuning : imports
+  transfer_learning ..> common : imports
+  experiments ..> transfer_learning : imports
+  scripts ..> fine_tuning : imports
+  scripts ..> transfer_learning : imports
+  fine_tuning_combined --> checkpoints : writes
+  checkpoints --> transfer_learning : loaded by
+  experiments --> records : writes
+</pre>
+      </div>
+    </section>
+  </main>
+
+  <footer>Generated from the repository source on 2026-10-04.</footer>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>mermaid.initialize({startOnLoad:true});</script></body></html>
