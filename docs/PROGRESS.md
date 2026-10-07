@@ -50,6 +50,36 @@ that lesion traits transfer across regions.
   transfer = cosine from step 0 (no warmup) + grad-clip 1.0. Both AdamW.
 - Deterministic seeds, patient-grouped leakage-safe splits, fixed train sets.
 
+## Discriminative-LLRD ablation (fine-stage boost) — record
+
+Intent: give **separate, decayed learning rates to the (1,2) and (3,4) layer groups**,
+so region-specific fine lesion traits (shallow layers) adapt while coarse/abstract
+layers move slowly. Rationale: lesions differ by delicate, fine-scale texture, so the
+high-resolution shallow stages get the strongest learning.
+
+**What was implemented** (`transfer_learning/embed/llrd_ablation.py:14`):
+```
+IMBAL = [1.0, 0.35, 0.6, 1.0, 1.0, 0.25]
+# depth:  head  st4   st3  st2  st1  stem
+```
+- Forward group (stages 1, 2): `1.0, 1.0` — boosted to full LR, **flat** (no decay within the group).
+- Backward group (stages 3, 4): `0.6, 0.35` — **decayed** (held back, coarse layers slow).
+- Boundary terms: head `1.0`, stem `0.25`.
+
+**How it matches the intent**
+- (1,2) treated as one boosted group — matches intent. ✓
+- (3,4) were **not** one shared rate — they decay separately (0.6 vs 0.35). ✗
+- Forward-group decay was **not** built (front held flat); only backward-group decay exists. ✗
+
+**Scope & result**
+- Ran **only on EMBED**, as a one-off ablation — not applied to the regional transfer runs.
+- Outcome: **AUROC 0.7651 — negative result** (lost to plain geometric decay 0.778).
+  Logged in `experiments/organize_auc.py` and `docs/PROJECT_DOSSIER.md` ("LLRD by stage").
+- Default across all transfer runs stays **plain geometric decay (0.75^depth)**.
+
+**Not yet built:** a clean two-group scheme with decay *within both* groups — (1,2) decaying
+from a high base and (3,4) decaying from a lower base — run across the regional datasets.
+
 ## Status
 - Code, docs, result tables, and the runbook are in the repo and committed.
 - Paper-ready tables: `AUROC_TABLE.tex`, `FINETUNE_TABLE.tex`; counts in `DATASET_COUNTS.md`.
